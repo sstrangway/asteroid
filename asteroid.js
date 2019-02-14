@@ -6,12 +6,15 @@ window.addEventListener('load', function() {
     World = Matter.World,
     Bodies = Matter.Bodies,
     Body = Matter.Body,
+    Events = Matter.Events,
     Composite = Matter.Composite,
     Composites = Matter.Composites,
     Constraint = Matter.Constraint,
     MouseConstraint = Matter.MouseConstraint,
     Mouse = Matter.Mouse;
 
+    const WIDTH = 1000;
+    const HEIGHT = 600;
     // create an engine
     var engine = Engine.create();
     engine.world.gravity.y = 0;
@@ -22,25 +25,22 @@ window.addEventListener('load', function() {
         element: document.body,
         engine: engine,
         options: {
-            width: 1000,
-            height: 600,
+            width: WIDTH,
+            height: HEIGHT,
             showAngleIndicator: true
         }
     });
 
     // create two boxes and a ground
-    var ship = Bodies.rectangle(30, 30, 25, 25,
-         { label: "snake", frictionAir: 0, friction: 0, frictionStatic: 0, mass: 800});
+    let ship = Bodies.rectangle(30, 30, 25, 25,
+         { label: "snake", frictionAir: 0, friction: 0, frictionStatic: 0, mass: 8000});
 
+    let bullets = [];
     console.log(ship);
-    var ground = Bodies.rectangle(500, 600, 1000, 10, { label: "wall", isStatic: true });
-    var top = Bodies.rectangle(500, 0, 1000, 10, { label: "wall", isStatic: true });
-    var left = Bodies.rectangle(0, 300, 10, 600, { label: "wall", isStatic: true });
-    var right = Bodies.rectangle(1000, 300, 10, 600, { label: "wall", isStatic: true });
 
     
     // add all of the bodies to the world
-    World.add(engine.world, [ship, ground, top, left, right]);
+    World.add(engine.world, ship);
 
     // run the engine
     Engine.run(engine);
@@ -51,57 +51,65 @@ window.addEventListener('load', function() {
     document.onkeypress = function (e) {
 
         e = e || window.event;
-        
         let keyCode = e.keyCode;
-        console.log(keyCode);
-
         let angle = ship.angle;
 
-        if (keyCode === 97){
+        if (keyCode === 97 || keyCode === 65){
             //a: 97
-            angle -= 0.25;
+            angle -= 0.2;
         } 
-        if (keyCode === 100){
+        if (keyCode === 100 | keyCode === 68){
             //d: 100
-            angle += 0.25;
+            angle += 0.2;
         } 
 
         Body.setAngle(ship, angle);
-        console.log(ship);
 
-        if (keyCode === 119){
+        if (keyCode === 119 | keyCode === 87){
             // w
             Body.applyForce(ship, ship.position, {
-                x: Math.cos(angle) * 2, 
-                y: Math.sin(angle) * 2
+                x: Math.cos(angle) * 15, 
+                y: Math.sin(angle) * 15
             });
         }
-        // if (keyCode === 97){
-        //     //a: 97
-        //     xForce = -1;
-        // } 
-        // if (keyCode === 100){
-        //     //d: 100
-        //     xForce = 1;
-        // } 
-        // if (keyCode === 119){
-        //     //w: 119
-        //     yForce = -1;
-        // } 
-        // if(keyCode === 115){
-        //     //s: 115
-        //     yForce = 1;
-        // }
 
-        // Body.applyForce( ship, 
-        //     {x: ship.position.x, y: ship.position.y},
-        //     {x: xForce, y: yForce});
+        if(keyCode === 32) {
+            console.log('shoot');
+            let bullet = Bodies.circle(ship.position.x, ship.position.y, 3,
+                { label: "bullet", frictionAir: 0, friction: 0, frictionStatic: 0, mass: 1});
+           
+            Body.applyForce(bullet, ship.position, {
+                x: Math.cos(angle)/100,
+                y: Math.sin(angle)/100
+            });
+            bullets.push(bullet);
+            World.add(engine.world, bullet);
 
-        // if(!isNaN(Math.atan(ship.velocity.y/ship.velocity.x))){
-        //     console.log(  Math.atan(ship.velocity.y/ship.velocity.x));
-        //     Body.setAngle(ship, Math.atan(ship.velocity.y/ship.velocity.x));
-        // }
-
+       
+        }
     };
+
+    Events.on(engine, "tick", function () {
+        objectWrapAround(ship);
+        bullets.forEach( (bullet) => {
+            objectWrapAround(bullet);
+        })
+    });
+
+    function objectWrapAround(object) {
+        if (object.position.y <= 0) {
+            Matter.Body.translate(object, {x: 0, y: HEIGHT});
+        }
+        if (object.position.y >= HEIGHT) {
+            Matter.Body.translate(object, {x: 0, y: -HEIGHT});
+        }
+
+        if (object.position.x <= 0) {
+            Matter.Body.translate(object, {x: WIDTH, y: 0});
+        }
+        if (object.position.x >= WIDTH) {
+            Matter.Body.translate(object, {x: -WIDTH, y: 0});
+        }
+    }
 
 });
