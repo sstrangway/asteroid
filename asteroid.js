@@ -36,8 +36,7 @@ window.addEventListener('load', function() {
          { label: "snake", frictionAir: 0, friction: 0, frictionStatic: 0, mass: 8000});
 
     let bullets = [];
-    console.log(ship);
-
+    let asteroids = [];
     
     // add all of the bodies to the world
     World.add(engine.world, ship);
@@ -48,6 +47,10 @@ window.addEventListener('load', function() {
     // run the renderer
     Render.run(render);
     
+
+    setInterval(() => { addAsteriod(); }, 10000);
+
+
     document.onkeypress = function (e) {
 
         e = e || window.event;
@@ -75,12 +78,12 @@ window.addEventListener('load', function() {
 
         if(keyCode === 32) {
             console.log('shoot');
-            let bullet = Bodies.circle(ship.position.x, ship.position.y, 3,
+            let bullet = Bodies.circle(ship.position.x + (Math.cos(angle)*5), ship.position.y + (Math.sin(angle)*5), 3,
                 { label: "bullet", frictionAir: 0, friction: 0, frictionStatic: 0, mass: 1});
            
-            Body.applyForce(bullet, ship.position, {
-                x: Math.cos(angle)/100,
-                y: Math.sin(angle)/100
+            Body.applyForce(bullet, bullet.position, {
+                x: Math.cos(angle)/25,
+                y: Math.sin(angle)/25
             });
             bullets.push(bullet);
             World.add(engine.world, bullet);
@@ -93,7 +96,10 @@ window.addEventListener('load', function() {
         objectWrapAround(ship);
         bullets.forEach( (bullet) => {
             objectWrapAround(bullet);
-        })
+        });
+        asteroids.forEach( (asteriod) => {
+            objectWrapAround(asteriod);
+        });
     });
 
     function objectWrapAround(object) {
@@ -112,4 +118,22 @@ window.addEventListener('load', function() {
         }
     }
 
+    function addAsteriod() {
+        var xPos = Math.random() * WIDTH;
+        var yPos = Math.random() * HEIGHT;
+
+        var xForce = Math.random() * 90 + 10
+        var yForce = Math.random() * 90 + 10
+
+
+        let asteriod = Bodies.circle(xPos, yPos, 50,
+            { label: "asteriod", frictionAir: 0, friction: 0, frictionStatic: 0, mass: 5000});
+        asteroids.push(asteriod);
+        Body.applyForce(asteriod, asteriod.position, {
+            x: Math.cos(Math.random()*360)*xForce,
+            y: Math.sin(Math.random()*360)*yForce
+        });
+        World.add(engine.world, asteriod);
+
+    }
 });
