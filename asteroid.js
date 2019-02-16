@@ -7,6 +7,7 @@ window.addEventListener('load', function() {
     Bodies = Matter.Bodies,
     Body = Matter.Body,
     Events = Matter.Events,
+    Vertices = Matter.Vertices,
     Composite = Matter.Composite,
     Composites = Matter.Composites,
     Constraint = Matter.Constraint,
@@ -48,7 +49,7 @@ window.addEventListener('load', function() {
     Render.run(render);
     
 
-    setInterval(() => { addAsteriod(); }, 10000);
+    setInterval(() => { addAsteriod(asteroids); }, 3000);
 
 
     document.onkeypress = function (e) {
@@ -118,7 +119,7 @@ window.addEventListener('load', function() {
         }
     }
 
-    function addAsteriod() {
+    function addAsteriod(asteriods) {
         var xPos = Math.random() * WIDTH;
         var yPos = Math.random() * HEIGHT;
 
@@ -126,14 +127,28 @@ window.addEventListener('load', function() {
         var yForce = Math.random() * 90 + 10
 
 
-        let asteriod = Bodies.circle(xPos, yPos, 50,
-            { label: "asteriod", frictionAir: 0, friction: 0, frictionStatic: 0, mass: 5000});
-        asteroids.push(asteriod);
+        var polyVector = '';
+        var x = 0;
+        var y = 0;
+        var angle = 0;
+        var sides = 5;
+        var size = 40;
+  
+        for (var i = 0; i < sides; i++) {
+          angle += 2 * Math.PI / sides; //2 * Pi is 360 degrees in radians
+
+          x = Math.round(size * Math.cos(angle));
+          y = Math.round(size * Math.sin(angle));
+          polyVector = polyVector.concat(x + ' ' + y + ' ');
+        }
+        
+        let asteriod = Matter.Bodies.fromVertices(xPos, yPos, Vertices.fromPath(polyVector), 
+        { label: "asteriod", frictionAir: 0, friction: 0, frictionStatic: 0, mass: 20000});        
         Body.applyForce(asteriod, asteriod.position, {
             x: Math.cos(Math.random()*360)*xForce,
             y: Math.sin(Math.random()*360)*yForce
         });
+        asteriods.push(asteriod)
         World.add(engine.world, asteriod);
-
     }
 });
