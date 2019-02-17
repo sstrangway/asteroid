@@ -131,14 +131,33 @@ window.addEventListener('load', function() {
         var x = 0;
         var y = 0;
         var angle = 0;
-        var sides = 5;
-        var size = 40;
-  
-        for (var i = 0; i < sides; i++) {
-          angle += 2 * Math.PI / sides; //2 * Pi is 360 degrees in radians
+        var sides = Math.floor(Math.random() * 10) + 4 ;
+        var size = Math.floor(Math.random() * 75) + 30;
+        var sizeRandomness = 0;
 
-          x = Math.round(size * Math.cos(angle));
-          y = Math.round(size * Math.sin(angle));
+        let randomNumbers = [];
+        let sumOfRandomNumbers = 0;
+        for (var i = 0; i < sides; i++) {
+            let randNumber = Math.random();
+            randomNumbers.push(randNumber);
+            sumOfRandomNumbers += randNumber;
+        }
+        var normalizedRandomNumbers = [];
+        randomNumbers.forEach( (number) => {
+            normalizedRandomNumbers.push( number/sumOfRandomNumbers );
+        });
+        console.log(normalizedRandomNumbers);
+
+
+
+        for (var i = 0; i < sides; i++) {
+          //angle += 2 * Math.PI / sides; //2 * Pi is 360 degrees in radians
+            angle += 2 * Math.PI * normalizedRandomNumbers[i];
+            
+
+            var sizeRandomness = Math.floor(Math.random() * 15) + 0 ;
+          x = Math.round((size + sizeRandomness) * Math.cos(angle));
+          y = Math.round((size + sizeRandomness) * Math.sin(angle));
           polyVector = polyVector.concat(x + ' ' + y + ' ');
         }
         
